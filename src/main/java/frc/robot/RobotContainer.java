@@ -11,6 +11,8 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Drive;
+import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.SwerveDrivetrain;
 
 
@@ -24,6 +26,8 @@ public class RobotContainer
 {
     // The robot's subsystems and commands are defined here...
     private final SwerveDrivetrain m_drive = new SwerveDrivetrain();
+    private final Intake m_intake = new Intake();
+    private final Shooter m_shooter = new Shooter();
     
     // Replace with CommandPS4Controller or CommandJoystick if needed
     private final CommandXboxController driverController =
@@ -54,6 +58,16 @@ public class RobotContainer
         // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
         // cancelling on release.
         m_drive.setDefaultCommand(new Drive(m_drive, driverController));
+
+        driverController.x()
+                .whileTrue(new InstantCommand(m_intake::extend))
+                .whileFalse(new InstantCommand(m_intake::retract));
+        driverController.y()
+                .or(driverController.b())
+                .whileTrue(new InstantCommand(m_shooter::shoot))
+                .whileFalse(new InstantCommand(m_shooter::stop));
+        driverController.y()
+                .whileTrue(new InstantCommand(m_intake::runMagazine));
     }
     
     

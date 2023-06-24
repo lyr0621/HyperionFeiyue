@@ -29,4 +29,8 @@ public class Intake extends SubsystemBase {
         m_indexer.set(TalonFXControlMode.PercentOutput, 0.0);
         m_intake.set(TalonFXControlMode.PercentOutput, 0.0);
     }
+
+    public void runMagazine() {
+        m_indexer.set(TalonFXControlMode.PercentOutput, 1.0);
+    }
 }
