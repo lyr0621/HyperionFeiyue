@@ -10,7 +10,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -19,10 +18,10 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
 
 public class SwerveDrivetrain extends SubsystemBase {
-    private final SwerveModFalcon m_frMod;
-    private final SwerveModFalcon m_flMod;
-    private final SwerveModFalcon m_blMod;
-    private final SwerveModFalcon m_brMod;
+    private final SwerveModFalcon m_0Mod;
+    private final SwerveModFalcon m_1Mod;
+    private final SwerveModFalcon m_2Mod;
+    private final SwerveModFalcon m_3Mod;
 
     private final WPI_Pigeon2 m_gyro;
 //    private final TimeOfFlight m_tofSensor;
@@ -40,10 +39,10 @@ public class SwerveDrivetrain extends SubsystemBase {
 
     public SwerveDrivetrain() {
         // Check current robot mode for the proper hardware
-        m_flMod = new SwerveModFalcon(DriveConstants.MOD_FL_OFFSET, DriveConstants.MOD_FL_CANS);
-        m_frMod = new SwerveModFalcon(DriveConstants.MOD_FR_OFFSET, DriveConstants.MOD_FR_CANS);
-        m_blMod = new SwerveModFalcon(DriveConstants.MOD_BL_OFFSET, DriveConstants.MOD_BL_CANS);
-        m_brMod = new SwerveModFalcon(DriveConstants.MOD_BR_OFFSET, DriveConstants.MOD_BR_CANS);
+        m_1Mod = new SwerveModFalcon(DriveConstants.MOD_1_OFFSET, DriveConstants.MOD_1_CANS);
+        m_0Mod = new SwerveModFalcon(DriveConstants.MOD_0_OFFSET, DriveConstants.MOD_0_CANS);
+        m_2Mod = new SwerveModFalcon(DriveConstants.MOD_2_OFFSET, DriveConstants.MOD_2_CANS);
+        m_3Mod = new SwerveModFalcon(DriveConstants.MOD_3_OFFSET, DriveConstants.MOD_3_CANS);
 
         // open gyro and ToF sensor
         m_gyro = new WPI_Pigeon2(DriveConstants.GYRO_CAN);
@@ -82,16 +81,18 @@ public class SwerveDrivetrain extends SubsystemBase {
         updatePoseEstimator();
         m_field.setRobotPose(getPose());
         m_field.setRobotPose(m_poseEstimator.getEstimatedPosition());
+
+        SmartDashboard.putNumber("Swerve Heading", getGyroYaw().getDegrees());
 }
 
     // Getters
     public SwerveModulePosition[] getModulePositions() {
         SwerveModulePosition[] modPos = new SwerveModulePosition[4];
 
-        modPos[0] = m_flMod.getPosition();
-        modPos[1] = m_frMod.getPosition();
-        modPos[2] = m_blMod.getPosition();
-        modPos[3] = m_brMod.getPosition();
+        modPos[0] = m_0Mod.getPosition();
+        modPos[1] = m_1Mod.getPosition();
+        modPos[2] = m_2Mod.getPosition();
+        modPos[3] = m_3Mod.getPosition();
 
         return modPos;
     }
@@ -100,10 +101,10 @@ public class SwerveDrivetrain extends SubsystemBase {
     public SwerveModuleState[] getModuleStates() {
         SwerveModuleState[] states = new SwerveModuleState[4];
 
-        states[0] = m_flMod.getState();
-        states[1] = m_frMod.getState();
-        states[2] = m_blMod.getState();
-        states[3] = m_brMod.getState();
+        states[0] = m_0Mod.getState();
+        states[1] = m_1Mod.getState();
+        states[2] = m_2Mod.getState();
+        states[3] = m_3Mod.getState();
 
         return states;
     }
@@ -132,15 +133,11 @@ public class SwerveDrivetrain extends SubsystemBase {
     public void setModuleStates(SwerveModuleState[] states) {
        for (SwerveModuleState state : states) {
            state.speedMetersPerSecond *= m_speedMult;
-//            if (SmartDashboard.getBoolean("Stella Mode", true)) {
-//                state.speedMetersPerSecond *= 0.2;
-//            }
        }
-
-        m_flMod.setDesiredState(states[0]);
-        m_frMod.setDesiredState(states[1]);
-        m_blMod.setDesiredState(states[2]);
-        m_brMod.setDesiredState(states[3]);
+        m_0Mod.setDesiredState(states[0]);
+        m_1Mod.setDesiredState(states[1]);
+        m_2Mod.setDesiredState(states[2]);
+        m_3Mod.setDesiredState(states[3]);
     }
 
     public void resetGyro(double heading) {

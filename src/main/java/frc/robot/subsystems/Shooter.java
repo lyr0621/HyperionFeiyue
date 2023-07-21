@@ -40,7 +40,7 @@ public class Shooter extends SubsystemBase {
 
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("Recorded RPM", Utils.falconToRPM(m_left.getSelectedSensorVelocity() + m_right.getSelectedSensorVelocity() / 2, 1.0));
+        SmartDashboard.putNumber("Recorded RPM", Utils.falconToRPM(m_left.getSelectedSensorVelocity(), 1.0));
         SmartDashboard.putNumber("Desired RPM", SmartDashboard.getNumber("Shooter RPM", 2000));
     }
 
@@ -48,9 +48,9 @@ public class Shooter extends SubsystemBase {
         double output = SmartDashboard.getNumber("Shooter RPM", 2000);
         double arbOutput = m_ff.calculate(output);
 
-        m_right.set(ControlMode.Velocity, Utils.RPMToFalcon(output, 1.0));
-        m_left.set(TalonFXControlMode.Velocity, Utils.RPMToFalcon(output, 1.0));
-        m_kicker.set(TalonFXControlMode.PercentOutput, 1.0, DemandType.ArbitraryFeedForward, arbOutput);
+        m_right.set(ControlMode.Velocity, Utils.RPMToFalcon(output, 1.0), DemandType.ArbitraryFeedForward, arbOutput);
+        m_left.set(TalonFXControlMode.Velocity, Utils.RPMToFalcon(output, 1.0), DemandType.ArbitraryFeedForward, arbOutput);
+        m_kicker.set(TalonFXControlMode.PercentOutput, 1.0);
     }
 
     public void stop() {

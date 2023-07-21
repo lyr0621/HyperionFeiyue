@@ -15,6 +15,7 @@ import frc.robot.commands.Drive;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.SwerveDrivetrain;
+import frc.robot.subsystems.TurretSubsystem;
 
 
 /**
@@ -29,6 +30,7 @@ public class RobotContainer
     private final SwerveDrivetrain m_drive = new SwerveDrivetrain();
     private final Intake m_intake = new Intake();
     private final Shooter m_shooter = new Shooter();
+    private final TurretSubsystem m_turret = new TurretSubsystem();
 
     private final PneumaticHub ph = new PneumaticHub(2);
     
@@ -73,6 +75,13 @@ public class RobotContainer
         driverController.y()
                 .whileTrue(new InstantCommand(m_intake::runMagazine))
                 .whileFalse(new InstantCommand(m_intake::stopMagazine));
+
+        driverController.rightBumper()
+                .whileTrue(m_turret.trackTargetFactory())
+                .whileFalse(m_turret.stopTurretFactory());
+        driverController.leftBumper()
+                .whileTrue(new InstantCommand(() -> m_turret.enableTurret(true)))
+                .whileFalse(new InstantCommand(() -> m_turret.enableTurret(false)));
     }
     
     

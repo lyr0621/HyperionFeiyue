@@ -69,6 +69,10 @@ public class Utils {
         return counts * (360.0 / (gearRatio * 2048.0));
     }
 
+    public static double falconToDegrees4096(double counts, double gearRatio) {
+        return counts * (360 / (gearRatio * 4096));
+    }
+
     /***
      * Converts from degrees to Falcon encoder position
      *

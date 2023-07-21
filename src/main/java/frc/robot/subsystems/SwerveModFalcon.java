@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import edu.wpi.first.wpilibj.Timer;
 import frc.robot.CTREModuleState;
 import frc.robot.Constants.ModuleConstants;
 
@@ -44,8 +45,7 @@ public class SwerveModFalcon {
         m_azimuthFx.config_kP(0, ModuleConstants.MODULE_KP);
         m_azimuthFx.config_kD(0, ModuleConstants.MODULE_KD);
         m_azimuthFx.setNeutralMode(NeutralMode.Brake);
-        m_azimuthFx.setInverted(false);
-        m_azimuthFx.setSensorPhase(false);
+        m_azimuthFx.setInverted(true);
         m_azimuthFx.configIntegratedSensorInitializationStrategy(SensorInitializationStrategy.BootToZero);
         m_azimuthFx.configNeutralDeadband(0.01);
         
@@ -53,10 +53,11 @@ public class SwerveModFalcon {
         m_encoder.configFactoryDefault();
         m_encoder.configSensorInitializationStrategy(SensorInitializationStrategy.BootToAbsolutePosition);
         m_encoder.configAbsoluteSensorRange(AbsoluteSensorRange.Unsigned_0_to_360);
-        m_encoder.configSensorDirection(true);
+        m_encoder.configSensorDirection(false);
         m_encoder.configMagnetOffset(0.0);
         
         // Update azimuth encoder to match absolute value encoder
+        Timer.delay(1);
         resetToAbsolute();
     }
 
@@ -96,8 +97,8 @@ public class SwerveModFalcon {
      * @return the current state of the object
      */
     public SwerveModulePosition getPosition() {
-        double distance = (m_driveFx.getSelectedSensorPosition() / 4096) * ModuleConstants.WHEEL_CIRCUMFERENCE_METERS;
-        return new SwerveModulePosition(distance, getCanCoder());
+        double distance = (m_driveFx.getSelectedSensorPosition() / 2048.0 / ModuleConstants.DRIVE_RATIO) * ModuleConstants.WHEEL_CIRCUMFERENCE_METERS;
+        return new SwerveModulePosition(distance, Rotation2d.fromDegrees(getAzimuthAngle()));
     }
     
     /**
