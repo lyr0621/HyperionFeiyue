@@ -1,6 +1,8 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix.sensors.WPI_Pigeon2;
+import com.pathplanner.lib.PathPlannerTrajectory;
+import com.pathplanner.lib.auto.SwerveAutoBuilder;
 import edu.wpi.first.math.MatBuilder;
 import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -15,7 +17,11 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.Constants.DriveConstants;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class SwerveDrivetrain extends SubsystemBase {
     private final SwerveModFalcon m_0Mod;
@@ -159,14 +165,6 @@ public class SwerveDrivetrain extends SubsystemBase {
         m_poseEstimator.update(getGyroYaw(), getModulePositions());
     }
 
-    public Pose2d getFrontCamTagPose() {
-        return new Pose2d();
-    }
-
-    public int getFrontCamTagID() {
-        return 0;
-    }
-
     public void resetPose(Pose2d newPose) {
         m_poseEstimator.resetPosition(getGyroYaw(), getModulePositions(), newPose);
     }
@@ -180,11 +178,17 @@ public class SwerveDrivetrain extends SubsystemBase {
         return runOnce(this::resetGyro);
     }
 
-    public void setFieldRelative(boolean relative) {
-        fieldOriented = relative;
-    }
-
-    public CommandBase resetPoseBase() {
-        return runOnce(() -> resetPose(new Pose2d()));
+    public SwerveAutoBuilder getAutoBuilder(Map<String, Command> eventMap) {
+        return new SwerveAutoBuilder(
+                this::getPose,
+                this::resetPose,
+                Constants.DriveConstants.DRIVE_KINEMATICS,
+                Constants.AutoConstants.TranslationConstants,
+                Constants.AutoConstants.RotationConstants,
+                this::setModuleStates,
+                eventMap,
+                false,
+                this
+        );
     }
 }

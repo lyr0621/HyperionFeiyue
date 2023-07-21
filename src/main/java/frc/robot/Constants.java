@@ -5,6 +5,8 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.auto.PIDConstants;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.util.Units;
@@ -73,5 +75,14 @@ public final class Constants
                 new Translation2d(WHEEL_BASE / 2, TRACK_WIDTH / 2), //Mod 1
                 new Translation2d(-WHEEL_BASE / 2, TRACK_WIDTH / 2), //Mod 2
                 new Translation2d(-WHEEL_BASE / 2, -TRACK_WIDTH / 2)); //Mod 3
+    }
+
+    public static class AutoConstants {
+        public static PIDController XController = new PIDController(1.0, 0.0, 0.0);
+        public static PIDController YController = new PIDController(1.0, 0.0, 0.0);
+        public static PIDController ThetaController = new PIDController(1.0, 0.0, 0.0);
+
+        public static PIDConstants TranslationConstants = new PIDConstants(0.25, 0.0, 0.0);
+        public static PIDConstants RotationConstants = new PIDConstants(1.0, 0.0, 0.0);
     }
 }

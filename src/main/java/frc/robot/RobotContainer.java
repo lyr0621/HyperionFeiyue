@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.auto.FollowPathCommand;
 import frc.robot.commands.Drive;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
@@ -66,22 +67,24 @@ public class RobotContainer
         m_drive.setDefaultCommand(new Drive(m_drive, driverController));
 
         driverController.x()
+                .and(driverController.y().negate())
                 .whileTrue(new InstantCommand(m_intake::extend))
                 .whileFalse(new InstantCommand(m_intake::retract));
-        driverController.y()
-                .or(driverController.b())
-                .whileTrue(new InstantCommand(m_shooter::shoot))
-                .whileFalse(new InstantCommand(m_shooter::stop));
-        driverController.y()
-                .whileTrue(new InstantCommand(m_intake::runMagazine))
-                .whileFalse(new InstantCommand(m_intake::stopMagazine));
 
-        driverController.rightBumper()
-                .whileTrue(m_turret.trackTargetFactory())
-                .whileFalse(m_turret.stopTurretFactory());
-        driverController.leftBumper()
-                .whileTrue(new InstantCommand(() -> m_turret.enableTurret(true)))
-                .whileFalse(new InstantCommand(() -> m_turret.enableTurret(false)));
+        driverController.y()
+                .and(driverController.x().negate())
+                .whileTrue(new InstantCommand(m_shooter::runFlywheel))
+                .whileFalse(new InstantCommand(m_shooter::stop));
+
+        driverController.y()
+                .and(driverController.x())
+                .whileTrue(new InstantCommand(m_intake::runMagazine).alongWith(new InstantCommand(m_shooter::shoot)))
+                .whileFalse(new InstantCommand(m_intake::stopMagazine).alongWith(new InstantCommand(m_shooter::stop)));
+
+        driverController.start().onTrue(m_drive.resetGyroBase());
+//        driverController.rightBumper()
+//                .whileTrue(m_turret.trackTargetFactory())
+//                .whileFalse(m_turret.stopTurretFactory());
     }
     
     
@@ -93,6 +96,6 @@ public class RobotContainer
     public Command getAutonomousCommand()
     {
         // An example command will be run in autonomous
-        return new InstantCommand();
+        return new FollowPathCommand(m_drive, "New Path");
     }
 }

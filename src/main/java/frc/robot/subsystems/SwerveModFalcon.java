@@ -67,7 +67,9 @@ public class SwerveModFalcon {
      */
     public void setDesiredState(SwerveModuleState state) {
         SwerveModuleState desiredState = CTREModuleState.optimize(state, Rotation2d.fromDegrees(getAzimuthAngle()));
-        // double desiredSpeed = desiredState.speedMetersPerSecond;
+//         double desiredSpeed = desiredState.speedMetersPerSecond;
+        SmartDashboard.putNumber("Raw Output", desiredState.speedMetersPerSecond);
+
         double percentOutput = desiredState.speedMetersPerSecond / ModuleConstants.L1_MAX_SPEED_MPS; //This is swerve max speed , figure ths out
 
         SmartDashboard.putNumber("Drive Power", percentOutput);
