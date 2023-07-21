@@ -23,6 +23,10 @@ public class Shooter extends SubsystemBase {
         m_right = new TalonFX(22);
         m_kicker = new TalonFX(18);
 
+        m_right.configFactoryDefault();
+        m_left.configFactoryDefault();
+        m_kicker.configFactoryDefault();
+
         m_right.setInverted(InvertType.InvertMotorOutput);
         m_kicker.setInverted(true);
 
@@ -51,5 +55,9 @@ public class Shooter extends SubsystemBase {
         m_left.set(TalonFXControlMode.PercentOutput, 0.0);
         m_right.set(TalonFXControlMode.PercentOutput, 0.0);
         m_kicker.set(TalonFXControlMode.PercentOutput, 0.0);
+    }
+
+    public double calcRpmForDistance(double distance) {
+        return (0.051 * Math.pow(distance, 2)) - (7.834 * distance) + 3749.589;
     }
 }
