@@ -1,5 +1,6 @@
 package frc.robot.commands;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -18,9 +19,9 @@ public class Drive extends CommandBase {
     @Override
     public void execute() {
         m_drive.drive(
-                m_driverController.getLeftX() * 0.5,
-                -m_driverController.getLeftY() * 0.5,
-                m_driverController.getRightX() * 0.5
+                MathUtil.applyDeadband(m_driverController.getLeftX() * 0.5, 0.1),
+                MathUtil.applyDeadband(-m_driverController.getLeftY() * 0.5, 0.1),
+                MathUtil.applyDeadband(m_driverController.getRightX() * 0.5, 0.1)
         );
     }
 }

@@ -34,19 +34,9 @@ public class SwerveDrivetrain extends SubsystemBase {
     private final SwerveDrivePoseEstimator m_visionEstimator;
 
     private double m_currentPitch = 0;
-    private double m_previousPitch = 0;
     private double m_currentTime = 0;
-    private double m_prevTime = 0;
-    private boolean slowmode = false;
     private double m_speedMult = 1;
     private double m_rotationMult = 1;
-
-    public enum AlignmentOptions {
-        LEFT_ALIGN,
-        CENTER_ALIGN,
-        RIGHT_ALIGN,
-        HUMAN_PLAYER_ALIGN
-    }
 
     public SwerveDrivetrain() {
         // Check current robot mode for the proper hardware
@@ -91,21 +81,8 @@ public class SwerveDrivetrain extends SubsystemBase {
         // Update logged values
         updatePoseEstimator();
         m_field.setRobotPose(getPose());
-
-        SwerveModuleState[] states = getModuleStates();
-        for (SwerveModuleState s : states) {
-
-        }
-
         m_field.setRobotPose(m_poseEstimator.getEstimatedPosition());
-
-        // Record prev and current pitch and time used for auto balance
-        m_previousPitch = m_currentPitch;
-        m_currentPitch = getGyroPitch().getDegrees();
-
-        m_prevTime = m_currentTime;
-        m_currentTime = RobotController.getFPGATime();
-    }
+}
 
     // Getters
     public SwerveModulePosition[] getModulePositions() {
@@ -178,21 +155,6 @@ public class SwerveDrivetrain extends SubsystemBase {
         return Rotation2d.fromDegrees(m_gyro.getPitch());
     }
 
-    public Rotation2d getGyroRoll() {
-        return Rotation2d.fromDegrees(m_gyro.getRoll());
-    }
-
-    public double getGyroPitchRate() {
-        //Account for initail boot time
-        if (m_prevTime == 0) {
-            m_prevTime = RobotController.getFPGATime();
-        }
-        // Return the rate of falling
-        double fpgaElapsedTime = RobotController.getFPGATime() - m_prevTime;
-        return (m_currentPitch - m_previousPitch) / fpgaElapsedTime;
-    }
-
-
     public void updatePoseEstimator() {
         /*
          * Get swerve odometry
@@ -227,25 +189,5 @@ public class SwerveDrivetrain extends SubsystemBase {
 
     public CommandBase resetPoseBase() {
         return runOnce(() -> resetPose(new Pose2d()));
-    }
-
-    public void setSlowmode() {
-        slowmode = !slowmode;
-    }
-
-    public boolean getSlowmode() {
-        return slowmode;
-    }
-
-    public CommandBase setSlowmodeFactory() {
-        return runOnce(this::setSlowmode);
-    }
-
-    public void setSpeedMult(double mult) {
-        m_speedMult = mult;
-    }
-
-    public void setRotationMult(double mult) {
-        m_rotationMult = mult;
     }
 }

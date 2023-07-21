@@ -5,6 +5,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.PneumaticHub;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -28,6 +29,8 @@ public class RobotContainer
     private final SwerveDrivetrain m_drive = new SwerveDrivetrain();
     private final Intake m_intake = new Intake();
     private final Shooter m_shooter = new Shooter();
+
+    private final PneumaticHub ph = new PneumaticHub(2);
     
     // Replace with CommandPS4Controller or CommandJoystick if needed
     private final CommandXboxController driverController =
@@ -37,6 +40,7 @@ public class RobotContainer
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer()
     {
+        ph.enableCompressorDigital();
         // Configure the trigger bindings
         configureBindings();
     }
@@ -67,7 +71,8 @@ public class RobotContainer
                 .whileTrue(new InstantCommand(m_shooter::shoot))
                 .whileFalse(new InstantCommand(m_shooter::stop));
         driverController.y()
-                .whileTrue(new InstantCommand(m_intake::runMagazine));
+                .whileTrue(new InstantCommand(m_intake::runMagazine))
+                .whileFalse(new InstantCommand(m_intake::stopMagazine));
     }
     
     

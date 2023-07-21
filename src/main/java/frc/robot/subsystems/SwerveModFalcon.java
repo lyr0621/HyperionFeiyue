@@ -54,7 +54,7 @@ public class SwerveModFalcon {
         m_encoder.configSensorInitializationStrategy(SensorInitializationStrategy.BootToAbsolutePosition);
         m_encoder.configAbsoluteSensorRange(AbsoluteSensorRange.Unsigned_0_to_360);
         m_encoder.configSensorDirection(true);
-        m_encoder.configMagnetOffset(magnetOffset);
+        m_encoder.configMagnetOffset(0.0);
         
         // Update azimuth encoder to match absolute value encoder
         resetToAbsolute();
@@ -67,7 +67,7 @@ public class SwerveModFalcon {
     public void setDesiredState(SwerveModuleState state) {
         SwerveModuleState desiredState = CTREModuleState.optimize(state, Rotation2d.fromDegrees(getAzimuthAngle()));
         // double desiredSpeed = desiredState.speedMetersPerSecond;
-        double percentOutput = desiredState.speedMetersPerSecond; /// ModuleConstants.kMaxSpeedMetersPerSecond; //This is swerve max speed , figure ths out
+        double percentOutput = desiredState.speedMetersPerSecond / ModuleConstants.L1_MAX_SPEED_MPS; //This is swerve max speed , figure ths out
 
         SmartDashboard.putNumber("Drive Power", percentOutput);
 
@@ -104,7 +104,7 @@ public class SwerveModFalcon {
      * Resets the encoder in the Azimuth motor to match the absolute value read by the absolute encoder
      */
     public void resetToAbsolute() {
-        double absolutePosition = Utils.degreesToFalcon(m_encoder.getAbsolutePosition(), ModuleConstants.TURNING_RATIO);
+        double absolutePosition = Utils.degreesToFalcon(m_encoder.getAbsolutePosition() - m_magnetOffset, ModuleConstants.TURNING_RATIO);
         m_azimuthFx.setSelectedSensorPosition(absolutePosition);  
     }
 

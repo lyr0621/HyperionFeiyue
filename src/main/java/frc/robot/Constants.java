@@ -42,6 +42,7 @@ public final class Constants
         // PID constants
         public static final double MODULE_KP = 0.8;
         public static final double MODULE_KD = 0;
+        public static final double L1_MAX_SPEED_MPS = Units.feetToMeters(12.0);
         public static final double POSITION_CONVERSION_FACTOR = ((Math.PI * 2) / TURNING_RATIO);
 
         public static final double MODULE_KS = 0.0;
