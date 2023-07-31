@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix.sensors.WPI_Pigeon2;
+import com.ctre.phoenix.sensors.WPI_PigeonIMU;
 import com.pathplanner.lib.PathPlannerTrajectory;
 import com.pathplanner.lib.auto.SwerveAutoBuilder;
 import edu.wpi.first.math.MatBuilder;
@@ -24,6 +25,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SwerveDrivetrain extends SubsystemBase {
+
+    private final WPI_PigeonIMU m_pigeonIMU;
+
     private final SwerveModFalcon m_0Mod;
     private final SwerveModFalcon m_1Mod;
     private final SwerveModFalcon m_2Mod;
@@ -66,6 +70,8 @@ public class SwerveDrivetrain extends SubsystemBase {
                 new MatBuilder<>(Nat.N3(), Nat.N1()).fill(0.1, 0.1, 0.1),
                 new MatBuilder<>(Nat.N3(), Nat.N1()).fill(0.75, 0.75, Units.degreesToRadians(1.5))
         );
+
+        m_pigeonIMU = new WPI_PigeonIMU(36);
 
         // construct a secondary estimator for testing with cameras
         m_visionEstimator = new SwerveDrivePoseEstimator(
@@ -117,6 +123,41 @@ public class SwerveDrivetrain extends SubsystemBase {
 
     public Rotation2d getGyroYaw() {
         return m_gyro.getRotation2d();
+    }
+
+    public double getPitch(){
+        return m_pigeonIMU.getRoll();
+    }
+    public void dockAndEngage(){
+        // if(getPitch() > 2){
+        //     drive(-0.5,0,0);
+        // }
+        // else if(getPitch() < -2){
+        //     drive(0.5,0,0);
+        // }
+        // else if(getPitch() < 2 && getPitch() < -2){
+        //     // stop
+        //     drive(0,0,0);
+        // }
+
+        double speed;
+        double kP = 0.05;
+        speed = kP * -getPitch();
+
+        //already engaged
+        if (getPitch() < 2 && getPitch() > -2){
+            speed = 0;
+        }
+
+        // check if we're going too fast
+        if (speed > 0.35){
+            speed = 0.35;
+        }
+        if (speed < -0.35){
+            speed = -0.35;
+        }
+
+        drive(speed, 0, 0);
     }
 
 
