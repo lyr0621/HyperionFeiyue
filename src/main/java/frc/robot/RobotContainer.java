@@ -13,10 +13,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.auto.FollowPathCommand;
 import frc.robot.commands.Drive;
-import frc.robot.subsystems.Intake;
-import frc.robot.subsystems.Shooter;
-import frc.robot.subsystems.SwerveDrivetrain;
-import frc.robot.subsystems.TurretSubsystem;
+import frc.robot.subsystems.*;
 
 
 /**
@@ -30,7 +27,7 @@ public class RobotContainer
     // The robot's subsystems and commands are defined here...
     private final SwerveDrivetrain m_drive = new SwerveDrivetrain();
     private final Intake m_intake = new Intake();
-    private final Shooter m_shooter = new Shooter();
+    // private final Shooter m_shooter = new Shooter();
     private final TurretSubsystem m_turret = new TurretSubsystem();
 
     private final PneumaticHub ph = new PneumaticHub(2);
@@ -71,15 +68,22 @@ public class RobotContainer
                 .whileTrue(new InstantCommand(m_intake::extend))
                 .whileFalse(new InstantCommand(m_intake::retract));
 
-        driverController.y()
-                .and(driverController.x().negate())
-                .whileTrue(new InstantCommand(m_shooter::runFlywheel))
-                .whileFalse(new InstantCommand(m_shooter::stop));
+//        driverController.y()
+//                .and(driverController.x().negate())
+//                .whileTrue(new InstantCommand(m_shooter::runFlywheel))
+//                .whileFalse(new InstantCommand(m_shooter::stop));
+
+//        driverController.y()
+//                .and(driverController.x())
+//                .whileTrue(new InstantCommand(m_intake::runMagazine).alongWith(new InstantCommand(m_shooter::shoot)))
+//                .whileFalse(new InstantCommand(m_intake::stopMagazine).alongWith(new InstantCommand(m_shooter::stop)));
+
+        PracticeShooter shooter = new PracticeShooter(new int[] {21, 22}, 18);
 
         driverController.y()
-                .and(driverController.x())
-                .whileTrue(new InstantCommand(m_intake::runMagazine).alongWith(new InstantCommand(m_shooter::shoot)))
-                .whileFalse(new InstantCommand(m_intake::stopMagazine).alongWith(new InstantCommand(m_shooter::stop)));
+                .onTrue(new InstantCommand(shooter::enableShooter))
+                .onFalse(new InstantCommand(shooter::disableShooter));
+        driverController.x().onTrue(new InstantCommand(shooter::setDefaultShooterSpeed));
 
         driverController.start().onTrue(m_drive.resetGyroBase());
 //        driverController.rightBumper()
