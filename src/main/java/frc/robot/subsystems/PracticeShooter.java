@@ -1,11 +1,11 @@
 package frc.robot.subsystems;
 
+import com.ctre.phoenix.motorcontrol.InvertType;
 import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
-import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
 import frc.robot.Utils;
 
 public class PracticeShooter extends SubsystemBase {
@@ -16,17 +16,28 @@ public class PracticeShooter extends SubsystemBase {
 
     private SpeedChangeProcess currentProcess;
     private boolean disabled = false;
+    private double percentErrorIntegration;
 
-    public PracticeShooter(int[] shooterPorts, int kickerPort) {
+    public PracticeShooter(int[] shooterPorts, int kickerPort, boolean[] reverted) {
         shooterMotors = new TalonFX[shooterPorts.length];
-        for (int i = 0; i < shooterPorts.length; i++)
+        for (int i = 0; i < shooterPorts.length; i++) {
             this.shooterMotors[i] = new TalonFX(shooterPorts[i]);
+            this.shooterMotors[i].configFactoryDefault();
+            this.shooterMotors[i].configVoltageCompSaturation(12.0);
+            this.shooterMotors[i].enableVoltageCompensation(true);
+            if (reverted[i])
+                this.shooterMotors[i].setInverted(InvertType.InvertMotorOutput);
+        }
 
+        this.percentErrorIntegration = 0;
         this.kickerMotor = new TalonFX(kickerPort);
+        this.currentProcess = new SpeedChangeProcess(0, 0);
+        kickerMotor.setInverted(reverted[reverted.length-1]);
     }
 
     public void setShooterSpeed(int speedRPM) {
-        this.currentProcess = new SpeedChangeProcess((int) shooterMotors[0].getSelectedSensorVelocity(), speedRPM);
+        this.currentProcess = new SpeedChangeProcess((int) getCurrentSpeedRPM(), speedRPM);
+        this.percentErrorIntegration = 0;
     }
 
     public void disableShooter() {
@@ -40,15 +51,18 @@ public class PracticeShooter extends SubsystemBase {
     @Override
     public void periodic() {
         double targetedSpeed = currentProcess.sampleCurrentVelocity();
-        double speedDifference = targetedSpeed - shooterMotors[0].getSelectedSensorVelocity();
+        double speedDifference = targetedSpeed - getCurrentSpeedRPM();
 
-        double feedBackPower = getCurrentSpeedRPM() / this.speedDifferenceStartDecelerate;
+        double feedBackPower = speedDifference * currentProcess.shooterMaxMotorPower / this.speedDifferenceStartDecelerate;
+        feedBackPower = MathUtil.clamp(feedBackPower, -currentProcess.shooterMaxMotorPower, currentProcess.shooterMaxMotorPower);
 
         if (disabled) feedBackPower = 0;
 
         for (TalonFX shooterMotor : shooterMotors) {
             shooterMotor.set(TalonFXControlMode.PercentOutput, feedBackPower);
         }
+        
+        System.out.println(getCurrentSpeedRPM() + "," + speedDifference * currentProcess.shooterMaxMotorPower / this.speedDifferenceStartDecelerate);
     }
 
     private double getCurrentSpeedRPM() {
@@ -63,9 +77,9 @@ public class PracticeShooter extends SubsystemBase {
         private final int shooterMaxAccelerationRPMPerSec = 1000;
         private final double shooterMaxMotorPower = 0.3;
 
-        private Timer taskTimer;
-        private int startingRPM;
-        private int targetedRPM;
+        private final Timer taskTimer;
+        private final int startingRPM;
+        private final int targetedRPM;
 
         public SpeedChangeProcess(int startingRPM, int targetedRPM) {
             taskTimer = new Timer();

@@ -63,10 +63,10 @@ public class RobotContainer
         // cancelling on release.
         m_drive.setDefaultCommand(new Drive(m_drive, driverController));
 
-        driverController.x()
-                .and(driverController.y().negate())
-                .whileTrue(new InstantCommand(m_intake::extend))
-                .whileFalse(new InstantCommand(m_intake::retract));
+//        driverController.x()
+//                .and(driverController.y().negate())
+//                .whileTrue(new InstantCommand(m_intake::extend))
+//                .whileFalse(new InstantCommand(m_intake::retract));
 
 //        driverController.y()
 //                .and(driverController.x().negate())
@@ -78,8 +78,9 @@ public class RobotContainer
 //                .whileTrue(new InstantCommand(m_intake::runMagazine).alongWith(new InstantCommand(m_shooter::shoot)))
 //                .whileFalse(new InstantCommand(m_intake::stopMagazine).alongWith(new InstantCommand(m_shooter::stop)));
 
-        PracticeShooter shooter = new PracticeShooter(new int[] {21, 22}, 18);
+        PracticeShooter shooter = new PracticeShooter(new int[] {21, 22}, 18, new boolean[] {true, false, true});
 
+        shooter.disableShooter();
         driverController.y()
                 .onTrue(new InstantCommand(shooter::enableShooter))
                 .onFalse(new InstantCommand(shooter::disableShooter));
