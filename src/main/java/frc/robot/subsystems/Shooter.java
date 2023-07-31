@@ -18,7 +18,7 @@ public class Shooter extends SubsystemBase {
     private SimpleMotorFeedforward m_ff;
 
     public Shooter() {
-        SmartDashboard.putNumber("Shooter RPM", 2000);
+        SmartDashboard.putNumber("Shooter RPM", 3200);
 
         m_left = new TalonFX(21);
         m_right = new TalonFX(22);
@@ -28,29 +28,40 @@ public class Shooter extends SubsystemBase {
         m_left.configFactoryDefault();
         m_kicker.configFactoryDefault();
 
-        m_left.configVoltageCompSaturation(12.0);
+        m_left.follow(m_right);
+
         m_right.configVoltageCompSaturation(12.0);
-        m_left.enableVoltageCompensation(true);
         m_right.enableVoltageCompensation(true);
 
         m_right.setInverted(InvertType.InvertMotorOutput);
         m_kicker.setInverted(true);
 
-        m_right.config_kP(0, 0.2574);
-        m_left.config_kP(0, 0.2574);
+        //0.2574
+        //m_right.config_kP(0, 0.35);
+        //m_right.config_kD(0,0.1);
+        m_right.config_kP(0, 0.4);
+        m_right.config_kD(0,0.25);
+        //m_right.config_kI(0,0.001);
 
-        m_ff = new SimpleMotorFeedforward(0.190, 0.228, 0.0);
+        //m_ff = new SimpleMotorFeedforward(0.090, 0.228, 0.0);
+        m_ff = new SimpleMotorFeedforward(0.6, 0.0, 0.0);
     }
 
     @Override
     public void periodic() {
         SmartDashboard.putNumber("Recorded RPM", Utils.falconToRPM(m_left.getSelectedSensorVelocity(), 1.0));
-        SmartDashboard.putNumber("Desired RPM", SmartDashboard.getNumber("Shooter RPM", 2000));
+        SmartDashboard.putNumber("Desired RPM", SmartDashboard.getNumber("Shooter RPM", 3200));
+
     }
 
     public void runFlywheel() {
-        double output = SmartDashboard.getNumber("Shooter RPM", 2000);
-        double arbOutput = m_ff.calculate(2000);
+
+        /*
+        lime_light distance: |    |
+        dashboard distance:  | 53 |
+         */
+        double output = SmartDashboard.getNumber("Shooter RPM", 3200);
+        double arbOutput = m_ff.calculate(3200);
 //        arbOutput = 0.0;
 
         m_right.set(ControlMode.Velocity, Utils.RPMToFalcon(output, 1.0), DemandType.ArbitraryFeedForward, arbOutput);
