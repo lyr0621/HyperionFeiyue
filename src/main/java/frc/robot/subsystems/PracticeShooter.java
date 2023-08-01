@@ -37,8 +37,8 @@ public class PracticeShooter extends SubsystemBase {
                 0,
                 0,
                 0,
-                3000,
-                9000
+                4000,
+                6000
         ));
     }
 
@@ -57,10 +57,11 @@ public class PracticeShooter extends SubsystemBase {
     @Override
     public void periodic() {
         double feedBackPower = pidController.getMotorPower(0, getCurrentSpeedRPM());
+        System.out.println("current speed:" + getCurrentSpeedRPM() + ", motor power:" + feedBackPower);
 
-        for (TalonFX shooterMotor : shooterMotors) {
-            shooterMotor.set(TalonFXControlMode.PercentOutput, feedBackPower);
-        }
+//        for (TalonFX shooterMotor : shooterMotors) {
+//            shooterMotor.set(TalonFXControlMode.PercentOutput, feedBackPower);
+//        }
     }
 
     private double getCurrentSpeedRPM() {

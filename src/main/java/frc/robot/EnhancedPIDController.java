@@ -100,12 +100,14 @@ public class EnhancedPIDController {
             case Task.MAINTAIN_SPEED: {
                 motorPower = 0;
                 // TODO write this part
+                break;
             }
             case Task.SET_TO_SPEED: {
                 if (pidProfile.dynamicallyAdjusting)
                     motorPower = getMotorPowerSetToVelocityDynamic(velocity);
                 else
                     motorPower = getMotorPowerSetToVelocityClassic(velocity);
+                break;
             }
             default: {
                 throw new IllegalArgumentException("Unknown task type given to the PID controller");
@@ -232,17 +234,20 @@ public class EnhancedPIDController {
 
         double velocityDifference = task.value - currentVelocity;
 
+        /* proportional */
         double feedBackPower = velocityDifference * pidProfile.getProportion();
+
+        /* integral */
+        feedBackPower += integralValue * pidProfile.getVelocityDifferenceIntegralCoefficient();
+        integralValue += velocityDifference * dt.get();
+
+        /* power restirction */
         double feedBackPowerMagnitude = Math.abs(feedBackPower);
         if (feedBackPowerMagnitude > pidProfile.getMaxPowerAllowed())
             feedBackPowerMagnitude = pidProfile.getMaxPowerAllowed();
         else if (feedBackPowerMagnitude < pidProfile.getMinPowerToMove())
             feedBackPowerMagnitude = pidProfile.getMinPowerToMove();
         feedBackPower = Math.copySign(feedBackPowerMagnitude, feedBackPower);
-
-        /* integral */
-        feedBackPower += integralValue;
-        integralValue += velocityDifference * dt.get();
 
         return feedBackPower;
     }
