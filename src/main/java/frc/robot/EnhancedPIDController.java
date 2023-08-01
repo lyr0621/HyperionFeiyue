@@ -42,14 +42,9 @@ public class EnhancedPIDController {
     private double gravitationalForce;
 
     public EnhancedPIDController(PIDProfile config) {
-        this(config, 0);
-    }
-
-    public EnhancedPIDController(PIDProfile config, double initialPosition) {
+        this.task = new Task(Task.MAINTAIN_SPEED, 0);
         this.pidProfile = config;
         dt = new Timer();
-
-        reset(initialPosition);
     }
 
     /** set all variables to initial state */
@@ -97,15 +92,20 @@ public class EnhancedPIDController {
             }
             case Task.GO_TO_POSITION: {
                 if (pidProfile.dynamicallyAdjusting)
-                    return getMotorPowerGoToPositionDynamic(currentPosition, velocity);
-                motorPower = getMotorPowerGoToPositionClassic(currentPosition, velocity);
+                    motorPower = getMotorPowerGoToPositionDynamic(currentPosition, velocity);
+                else
+                    motorPower = getMotorPowerGoToPositionClassic(currentPosition, velocity);
                 break;
             }
             case Task.MAINTAIN_SPEED: {
+                motorPower = 0;
                 // TODO write this part
             }
             case Task.SET_TO_SPEED: {
-
+                if (pidProfile.dynamicallyAdjusting)
+                    motorPower = getMotorPowerSetToVelocityDynamic(velocity);
+                else
+                    motorPower = getMotorPowerSetToVelocityClassic(velocity);
             }
             default: {
                 throw new IllegalArgumentException("Unknown task type given to the PID controller");

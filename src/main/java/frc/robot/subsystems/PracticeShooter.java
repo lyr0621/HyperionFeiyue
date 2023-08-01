@@ -32,7 +32,7 @@ public class PracticeShooter extends SubsystemBase {
         kickerMotor.setInverted(reverted[reverted.length-1]);
 
         this.pidController = new EnhancedPIDController(new EnhancedPIDController.DynamicalPIDProfile(
-                0.3,
+                0.5,
                 0.05,
                 0,
                 0,
