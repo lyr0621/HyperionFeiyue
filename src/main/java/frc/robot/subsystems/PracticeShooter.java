@@ -5,6 +5,7 @@ import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.EnhancedPIDController;
 import frc.robot.Utils;
@@ -33,10 +34,10 @@ public class PracticeShooter extends SubsystemBase {
 
         this.pidController = new EnhancedPIDController(new EnhancedPIDController.DynamicalPIDProfile(
                 0.5,
-                0.05,
+                0.1,
                 0,
                 0,
-                0,
+                0.8 / 3000,
                 4000,
                 6000
         ));
@@ -57,11 +58,12 @@ public class PracticeShooter extends SubsystemBase {
     @Override
     public void periodic() {
         double feedBackPower = pidController.getMotorPower(0, getCurrentSpeedRPM());
-        System.out.println("current speed:" + getCurrentSpeedRPM() + ", motor power:" + feedBackPower);
+        SmartDashboard.putNumber("current speed(rpm): " , getCurrentSpeedRPM());
+        SmartDashboard.putNumber("feed-back power:", feedBackPower);
 
-//        for (TalonFX shooterMotor : shooterMotors) {
-//            shooterMotor.set(TalonFXControlMode.PercentOutput, feedBackPower);
-//        }
+        for (TalonFX shooterMotor : shooterMotors) {
+            shooterMotor.set(TalonFXControlMode.PercentOutput, feedBackPower);
+        }
     }
 
     private double getCurrentSpeedRPM() {
@@ -71,4 +73,6 @@ public class PracticeShooter extends SubsystemBase {
     public void setDefaultShooterSpeed() {
         setShooterSpeed(3000);
     }
+
+    public void setMotorDisabled() { setShooterSpeed(0); }
 }
