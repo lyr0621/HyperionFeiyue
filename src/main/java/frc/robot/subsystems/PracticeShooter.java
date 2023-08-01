@@ -6,6 +6,7 @@ import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.EnhancedPIDController;
 import frc.robot.Utils;
 
 public class PracticeShooter extends SubsystemBase {
@@ -13,10 +14,8 @@ public class PracticeShooter extends SubsystemBase {
 
     private TalonFX[] shooterMotors;
     private TalonFX kickerMotor;
-
-    private SpeedChangeProcess currentProcess;
     private boolean disabled = false;
-    private double percentErrorIntegration; // TODO add integration
+    private EnhancedPIDController pidController;
 
     public PracticeShooter(int[] shooterPorts, int kickerPort, boolean[] reverted) {
         shooterMotors = new TalonFX[shooterPorts.length];
@@ -29,15 +28,22 @@ public class PracticeShooter extends SubsystemBase {
                 this.shooterMotors[i].setInverted(InvertType.InvertMotorOutput);
         }
 
-        this.percentErrorIntegration = 0;
         this.kickerMotor = new TalonFX(kickerPort);
-        this.currentProcess = new SpeedChangeProcess(0, 0);
         kickerMotor.setInverted(reverted[reverted.length-1]);
+
+        this.pidController = new EnhancedPIDController(new EnhancedPIDController.DynamicalPIDProfile(
+                0.3,
+                0.05,
+                0,
+                0,
+                0,
+                3000,
+                9000
+        ));
     }
 
     public void setShooterSpeed(int speedRPM) {
-        this.currentProcess = new SpeedChangeProcess((int) getCurrentSpeedRPM(), speedRPM);
-        this.percentErrorIntegration = 0;
+        this.pidController.startNewTask(new EnhancedPIDController.Task(EnhancedPIDController.Task.SET_TO_SPEED, 3000));
     }
 
     public void disableShooter() {
@@ -50,19 +56,11 @@ public class PracticeShooter extends SubsystemBase {
 
     @Override
     public void periodic() {
-        double targetedSpeed = currentProcess.sampleCurrentVelocity();
-        double speedDifference = targetedSpeed - getCurrentSpeedRPM();
-
-        double feedBackPower = speedDifference * currentProcess.shooterMaxMotorPower / this.speedDifferenceStartDecelerate;
-        feedBackPower = MathUtil.clamp(feedBackPower, -currentProcess.shooterMaxMotorPower, currentProcess.shooterMaxMotorPower);
-
-        if (disabled) feedBackPower = 0;
+        double feedBackPower = pidController.getMotorPower(0, getCurrentSpeedRPM());
 
         for (TalonFX shooterMotor : shooterMotors) {
             shooterMotor.set(TalonFXControlMode.PercentOutput, feedBackPower);
         }
-        
-        System.out.println(getCurrentSpeedRPM() + "," + speedDifference * currentProcess.shooterMaxMotorPower / this.speedDifferenceStartDecelerate);
     }
 
     private double getCurrentSpeedRPM() {
@@ -71,34 +69,5 @@ public class PracticeShooter extends SubsystemBase {
 
     public void setDefaultShooterSpeed() {
         setShooterSpeed(3000);
-    }
-
-    static class SpeedChangeProcess {
-        private final int shooterMaxAccelerationRPMPerSec = 1000;
-        private final double shooterMaxMotorPower = 0.3;
-
-        private final Timer taskTimer;
-        private final int startingRPM;
-        private final int targetedRPM;
-
-        public SpeedChangeProcess(int startingRPM, int targetedRPM) {
-            taskTimer = new Timer();
-            taskTimer.start();
-            taskTimer.reset();
-            this.startingRPM = startingRPM;
-            this.targetedRPM = targetedRPM;
-        }
-
-        public double sampleCurrentVelocity() {
-            if (targetedRPM - startingRPM > 0)
-                return Math.min(
-                        startingRPM + taskTimer.get() * this.shooterMaxAccelerationRPMPerSec,
-                        targetedRPM
-                );
-            return Math.max(
-                    startingRPM - taskTimer.get() * this.shooterMaxAccelerationRPMPerSec,
-                    targetedRPM
-            );
-        }
     }
 }
