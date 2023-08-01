@@ -16,7 +16,7 @@ public class PracticeShooter extends SubsystemBase {
 
     private SpeedChangeProcess currentProcess;
     private boolean disabled = false;
-    private double percentErrorIntegration;
+    private double percentErrorIntegration; // TODO add integration
 
     public PracticeShooter(int[] shooterPorts, int kickerPort, boolean[] reverted) {
         shooterMotors = new TalonFX[shooterPorts.length];
