@@ -5,6 +5,7 @@ import com.pathplanner.lib.PathPlannerTrajectory;
 import com.pathplanner.lib.auto.SwerveAutoBuilder;
 import edu.wpi.first.math.MatBuilder;
 import edu.wpi.first.math.Nat;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -19,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.DriveConstants;
+import frc.robot.EnhancedPIDController;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -42,6 +44,22 @@ public class SwerveDrivetrain extends SubsystemBase {
     private double m_currentTime = 0;
     private double m_speedMult = 1;
     private double m_rotationMult = 1;
+
+
+    /* balancing */
+    final double maxDegrees = 30;
+    final double toleranceDegrees = 2;
+    final double maxDrivingPower = 0.3;
+    final double minDrivingPower = 0.1;
+    final EnhancedPIDController pidBalanceController = new EnhancedPIDController(new EnhancedPIDController.StaticPIDProfile(
+            maxDrivingPower,
+            minDrivingPower,
+            maxDegrees,
+            toleranceDegrees,
+            0.1,
+            0,
+            0
+    ));
 
     public SwerveDrivetrain() {
         // Check current robot mode for the proper hardware
@@ -122,6 +140,10 @@ public class SwerveDrivetrain extends SubsystemBase {
 
     // Setters
     public void drive(double xTranslation, double yTranslation, double zRotation) {
+        drive(xTranslation, yTranslation, zRotation, this.fieldOriented);
+    }
+
+    public void drive(double xTranslation, double yTranslation, double zRotation, boolean fieldOriented) {
         SwerveModuleState[] states = DriveConstants.DRIVE_KINEMATICS.toSwerveModuleStates(
                 fieldOriented ? ChassisSpeeds.fromFieldRelativeSpeeds(
                         xTranslation,
@@ -132,8 +154,26 @@ public class SwerveDrivetrain extends SubsystemBase {
                         : new ChassisSpeeds(xTranslation, yTranslation, zRotation)
         );
 
-
         setModuleStates(states);
+    }
+
+    EnhancedPIDController.Task balanceTask = null;
+
+    public void disableMotors() {
+        drive(0, 0, 0);
+    }
+    public void balanceOnSeesaw() {
+        if (balanceTask == null) {
+            balanceTask = new EnhancedPIDController.Task(EnhancedPIDController.Task.GO_TO_POSITION, 0);
+            pidBalanceController.startNewTask(balanceTask);
+        }
+        double currentAngleDegrees = m_gyro.getPitch() * -1;
+
+        double feedBackPower;
+
+        feedBackPower = pidBalanceController.getMotorPower(currentAngleDegrees);
+
+        // drive(0, feedBackPower, 0);
     }
 
     public void setModuleStates(SwerveModuleState[] states) {

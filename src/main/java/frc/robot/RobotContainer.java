@@ -85,7 +85,7 @@ public class RobotContainer
                 .onTrue(new InstantCommand(shooter::enableShooter))
                 .onFalse(new InstantCommand(shooter::disableShooter));
 
-        driverController.x().onTrue(new InstantCommand(shooter::setDefaultShooterSpeed)).onFalse(new InstantCommand(shooter::setMotorDisabled));
+        driverController.x().onTrue(new InstantCommand(m_drive::balanceOnSeesaw)).onFalse(new InstantCommand(m_drive::disableMotors));
 
         driverController.start().onTrue(m_drive.resetGyroBase());
 //        driverController.rightBumper()

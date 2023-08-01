@@ -241,7 +241,7 @@ public class EnhancedPIDController {
         feedBackPower += integralValue * pidProfile.getVelocityDifferenceIntegralCoefficient();
         integralValue += velocityDifference * dt.get();
 
-        /* power restirction */
+        /* power restriction */
         double feedBackPowerMagnitude = Math.abs(feedBackPower);
         if (feedBackPowerMagnitude > pidProfile.getMaxPowerAllowed())
             feedBackPowerMagnitude = pidProfile.getMaxPowerAllowed();
@@ -331,6 +331,24 @@ public class EnhancedPIDController {
                     (errorStartDecelerate - errorTolerance);
         }
     }
+
+    public static class StaticPIDProfile extends PIDProfile {
+
+        /**
+         * Creates a new profile with the all settings given and fixed all the time
+         *
+         * @param dynamicallyAdjusting                  whether this profile will update according to feedbacks of the robot
+         * @param maxPowerAllowed                       the restriction on power
+         * @param minPowerToMove                        the amount of motor power required to make the mechanism moving
+         * @param errorStartDecelerate                  the distance to target where the mechanism should start decelerate, the mechanism will otherwise move with full power
+         * @param errorTolerance                        the amount of error to ignore
+         * @param feedForwardTime                       the amount of time to think forward for the mechanism, the feedback power will be calculated according to the predicted position of the mechanism after an amount of time instead of its current position
+         * @param errorIntegralCoefficient              the coefficient of the cumulated error, also known as kI
+         * @param velocityDifferenceIntegralCoefficient
+         */
+        public StaticPIDProfile(double maxPowerAllowed, double minPowerToMove, double errorStartDecelerate, double errorTolerance, double feedForwardTime, double errorIntegralCoefficient, double velocityDifferenceIntegralCoefficient) {
+            super(false, maxPowerAllowed, minPowerToMove, errorStartDecelerate, errorTolerance, feedForwardTime, errorIntegralCoefficient, velocityDifferenceIntegralCoefficient);
+}}
 
     /**
      *  PID coefficients that adjusts to the feedbacks from the machinist, senses oscillation and
