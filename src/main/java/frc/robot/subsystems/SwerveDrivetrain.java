@@ -26,7 +26,7 @@ import java.util.Map;
 
 public class SwerveDrivetrain extends SubsystemBase {
 
-    private final WPI_PigeonIMU m_pigeonIMU;
+    // private final WPI_PigeonIMU m_pigeonIMU;
 
     private final SwerveModFalcon m_0Mod;
     private final SwerveModFalcon m_1Mod;
@@ -71,7 +71,7 @@ public class SwerveDrivetrain extends SubsystemBase {
                 new MatBuilder<>(Nat.N3(), Nat.N1()).fill(0.75, 0.75, Units.degreesToRadians(1.5))
         );
 
-        m_pigeonIMU = new WPI_PigeonIMU(36);
+        // m_pigeonIMU = new WPI_PigeonIMU(36);
 
         // construct a secondary estimator for testing with cameras
         m_visionEstimator = new SwerveDrivePoseEstimator(
@@ -95,6 +95,11 @@ public class SwerveDrivetrain extends SubsystemBase {
         m_field.setRobotPose(m_poseEstimator.getEstimatedPosition());
 
         SmartDashboard.putNumber("Swerve Heading", getGyroYaw().getDegrees());
+        SmartDashboard.putNumber("Robot Angle Pitch", m_gyro.getPitch());
+        SmartDashboard.putNumber("Robot Angle Roll", m_gyro.getRoll());
+        SmartDashboard.putNumber("Robot Angle Yaw", m_gyro.getYaw());
+
+
 }
 
     // Getters
@@ -126,8 +131,15 @@ public class SwerveDrivetrain extends SubsystemBase {
     }
 
     public double getPitch(){
-        return m_pigeonIMU.getRoll();
+        return m_gyro.getRoll();
     }
+    public double getRoll(){
+        return m_gyro.getPitch();
+    }
+    public double getYaw(){
+        return m_gyro.getYaw();
+    }
+
     public void dockAndEngage(){
         // if(getPitch() > 2){
         //     drive(-0.5,0,0);
@@ -141,22 +153,24 @@ public class SwerveDrivetrain extends SubsystemBase {
         // }
 
         double speed;
-        double kP = 0.05;
+        double kP = 0.03;
         speed = kP * -getPitch();
 
         //already engaged
-        if (getPitch() < 2 && getPitch() > -2){
-            speed = 0;
-        }
+
 
         // check if we're going too fast
-        if (speed > 0.35){
-            speed = 0.35;
-        }
-        if (speed < -0.35){
-            speed = -0.35;
+        if (speed > 0.5){
+            speed = 0.5;
         }
 
+        if (speed < -0.5){
+            speed = -0.5;
+        }
+
+        if (getPitch() < 1 && getPitch() > -1){
+            speed = 0;
+        }
         drive(speed, 0, 0);
     }
 

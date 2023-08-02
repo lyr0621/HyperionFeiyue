@@ -12,7 +12,9 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.auto.FollowPathCommand;
+import frc.robot.commands.DockAndEngageCommand;
 import frc.robot.commands.Drive;
+import frc.robot.commands.KickerAndShooterCommand;
 import frc.robot.subsystems.*;
 
 
@@ -66,8 +68,9 @@ public class RobotContainer
 
         driverController.x()
                 .and(driverController.y().negate())
-                .whileTrue(new InstantCommand(m_intake::extend))
+                .whileTrue(new InstantCommand(m_intake::extendAndIntake))
                 .whileFalse(new InstantCommand(m_intake::retract));
+
 
         driverController.y()
                 .and(driverController.x().negate())
@@ -76,13 +79,21 @@ public class RobotContainer
 
         driverController.y()
                 .and(driverController.x())
-                .whileTrue(new InstantCommand(m_intake::runMagazine).alongWith(new InstantCommand(m_shooter::shoot)))
-                .whileFalse(new InstantCommand(m_intake::stopMagazine).alongWith(new InstantCommand(m_shooter::stop)));
+                .whileTrue(new KickerAndShooterCommand(m_shooter, m_limelight));
 
         driverController.start().onTrue(m_drive.resetGyroBase());
 //        driverController.rightBumper()
 //                .whileTrue(m_turret.trackTargetFactory())
 //                .whileFalse(m_turret.stopTurretFactory());
+
+        driverController.b()
+                .whileTrue(new DockAndEngageCommand(m_drive));
+
+        driverController.leftBumper()
+                .whileTrue(new InstantCommand(m_intake::runMagazineReverse).alongWith(new InstantCommand(m_intake::extend).alongWith(new InstantCommand(m_intake::outtake))))
+                .whileFalse(new InstantCommand(m_intake::stopMagazine).alongWith(new InstantCommand(m_intake::retract)).alongWith(new InstantCommand(m_intake::stopIntake)));
+
+
     }
     
     

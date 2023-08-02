@@ -30,7 +30,7 @@ public class RunIntakeCommand extends CommandBase {
      */
     @Override
     public void execute() {
-        m_intake.extend();
+        m_intake.extendAndIntake();
         Timer.delay(1.0);
         m_intake.retract();
         isFinished = true;

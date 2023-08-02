@@ -9,16 +9,19 @@ public class ShooterLookupTable {
     private final NavigableMap<Double, Double> m_list = new TreeMap<>();
     public ShooterLookupTable(){
        //m_list.put(1,2)
+        m_list.put(60.0,3200.0);
+        m_list.put(120.0,3600.0);
+        m_list.put(140.0,4200.0);
     }
     public double getVelocity(double distance){
         Map.Entry<Double, Double> floor = m_list.floorEntry(distance);
         if (floor == null) {
-            // return an rpm value;
+            return 2800;
         }
 
         Map.Entry<Double, Double> ceiling = m_list.ceilingEntry(distance);
         if (ceiling == null) {
-            // return max
+            return 4000;
         }
 
         double velocity1 = floor.getValue();

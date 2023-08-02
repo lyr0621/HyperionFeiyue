@@ -1,7 +1,6 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
@@ -19,7 +18,7 @@ public class Intake extends SubsystemBase {
         m_indexer = new TalonSRX(17);
     }
 
-    public void extend() {
+    public void extendAndIntake() {
         m_pistons.set(DoubleSolenoid.Value.kForward);
         m_indexer.set(ControlMode.PercentOutput, 0.75);
         m_intake.set(ControlMode.PercentOutput, -0.25);
@@ -31,8 +30,25 @@ public class Intake extends SubsystemBase {
         m_intake.set(ControlMode.PercentOutput, 0.0);
     }
 
-    public void runMagazine() {
+    public void extend() {
+        m_pistons.set(DoubleSolenoid.Value.kForward);
+    }
+
+    public void outtake() {
+        m_intake.set(ControlMode.PercentOutput, 0.25);
+    }
+
+    public void stopIntake() {
+        m_intake.set(ControlMode.PercentOutput, 0);
+    }
+
+    public void runMagazineForward() {
         m_indexer.set(ControlMode.PercentOutput, 1.0);
+    }
+
+
+    public void runMagazineReverse() {
+        m_indexer.set(ControlMode.PercentOutput, -0.7);
     }
 
     public void stopMagazine() {
