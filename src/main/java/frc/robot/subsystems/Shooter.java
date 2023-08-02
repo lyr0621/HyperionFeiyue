@@ -1,6 +1,5 @@
 package frc.robot.subsystems;
 
-import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.InvertType;
 import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
@@ -12,7 +11,7 @@ import frc.robot.Utils;
 
 public class Shooter extends SubsystemBase {
     private TalonFX m_left;
-    private TalonFX m_right;
+    private TalonFX m_right_master;
     private TalonFX m_kicker;
     private ShooterLookupTable m_lookuptable;
 
@@ -20,41 +19,47 @@ public class Shooter extends SubsystemBase {
     private SimpleMotorFeedforward m_ff;
 
     public Shooter() {
-        SmartDashboard.putNumber("Shooter RPM", 2300);
+        SmartDashboard.putNumber("Shooter RPM", 3000);
 
         m_left = new TalonFX(21);
-        m_right = new TalonFX(22);
+        m_right_master = new TalonFX(22);
         m_kicker = new TalonFX(18);
 
 
         m_lookuptable = new ShooterLookupTable();
 
-        m_right.configFactoryDefault();
+        m_right_master.configFactoryDefault();
         m_left.configFactoryDefault();
         m_kicker.configFactoryDefault();
 
-        m_left.follow(m_right);
+        m_left.follow(m_right_master);
 
-        m_right.configVoltageCompSaturation(12.0);
-        m_right.enableVoltageCompensation(true);
+        m_right_master.configVoltageCompSaturation(12.0);
+        //m_left.configVoltageCompSaturation(12.0);
+        m_right_master.enableVoltageCompensation(true);
+        //m_left.enableVoltageCompensation(true);
 
-        m_right.setInverted(InvertType.InvertMotorOutput);
+        m_right_master.setInverted(InvertType.InvertMotorOutput);
+        //m_left.setInverted(InvertType.InvertMotorOutput);
         m_kicker.setInverted(true);
 
         //0.2574
         //m_right.config_kP(0, 0.35);
         //m_right.config_kD(0,0.1);
-        m_right.config_kP(0, 0.3);
-        m_right.config_kD(0,0.3);
+        // m_right_master.config_kP(0, 0.1);
+        //m_left.config_kP(0, 0.1);
+        // m_right_master.config_kD(0,0.05);
+        //m_left.config_kP(0, 0.1);
         //m_right.config_kI(0,0.001);
 
         //m_ff = new SimpleMotorFeedforward(0.090, 0.228, 0.0);
-        m_ff = new SimpleMotorFeedforward(0.18, 0.00025, 0.0);
+        // m_ff = new SimpleMotorFeedforward(0.3, 0.0, 0.0);
     }
 
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("Recorded RPM", Utils.falconToRPM(m_left.getSelectedSensorVelocity(), 1.0));
+        SmartDashboard.putNumber("Recorded RPM Left", Utils.falconToRPM(m_left.getSelectedSensorVelocity(), 1.0));
+        SmartDashboard.putNumber("Recorded RPM Right", Utils.falconToRPM(m_right_master.getSelectedSensorVelocity(), 1.0));
         // SmartDashboard.putNumber("Desired RPM", SmartDashboard.getNumber("Shooter RPM", m_lookuptable.getVelocity()));
 
     }
@@ -79,12 +84,14 @@ public class Shooter extends SubsystemBase {
         lime_light distance: |  2800  |
         dashboard distance:  |   71   |
          */
-        double output = SmartDashboard.getNumber("Shooter RPM", speed);
+        SmartDashboard.putNumber("Shooter RPM", speed);
+        double output = speed;
+        // SmartDashboard.getNumber("Shooter RPM", speed);
         double arbOutput = m_ff.calculate(speed);
 //        arbOutput = 0.0;
 
-        m_right.set(ControlMode.Velocity, Utils.RPMToFalcon(output, 1.0), DemandType.ArbitraryFeedForward, arbOutput);
-        m_left.set(TalonFXControlMode.Velocity, Utils.RPMToFalcon(output, 1.0), DemandType.ArbitraryFeedForward, arbOutput);
+        m_right_master.set(TalonFXControlMode.Velocity, Utils.RPMToFalcon(output, 1.0), DemandType.ArbitraryFeedForward, arbOutput);
+        //m_left.set(TalonFXControlMode.Velocity, Utils.RPMToFalcon(output, 1.0), DemandType.ArbitraryFeedForward, arbOutput);
     }
 
     public void runFlywheel() {
@@ -93,22 +100,21 @@ public class Shooter extends SubsystemBase {
         double arbOutput = m_ff.calculate(3000);
 //        arbOutput = 0.0;
 
-        m_right.set(ControlMode.Velocity, Utils.RPMToFalcon(output, 1.0), DemandType.ArbitraryFeedForward, arbOutput);
-        m_left.set(TalonFXControlMode.Velocity, Utils.RPMToFalcon(output, 1.0), DemandType.ArbitraryFeedForward, arbOutput);
+        m_right_master.set(TalonFXControlMode.Velocity, Utils.RPMToFalcon(output, 1.0), DemandType.ArbitraryFeedForward, arbOutput);
+        //m_left.set(TalonFXControlMode.Velocity, Utils.RPMToFalcon(output, 1.0), DemandType.ArbitraryFeedForward, arbOutput);
     }
 
     public void runKicker() {
         m_kicker.set(TalonFXControlMode.PercentOutput, 1.0);
     }
-
     public void shoot() {
         runKicker();
-        runFlywheel(2300);
+        runFlywheel(3000);
     }
 
     public void stop() {
-        m_left.set(TalonFXControlMode.PercentOutput, 0.0);
-        m_right.set(TalonFXControlMode.PercentOutput, 0.0);
+       // m_left.set(TalonFXControlMode.PercentOutput, 0.0);
+        m_right_master.set(TalonFXControlMode.PercentOutput, 0.0);
         m_kicker.set(TalonFXControlMode.PercentOutput, 0.0);
     }
 

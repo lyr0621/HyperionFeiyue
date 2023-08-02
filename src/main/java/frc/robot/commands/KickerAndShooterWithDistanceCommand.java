@@ -1,17 +1,18 @@
 package frc.robot.commands;
 
+
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.LimelightSubsystem;
 import frc.robot.subsystems.Shooter;
 
-public class KickerAndShooterCommand extends CommandBase{
+public class KickerAndShooterWithDistanceCommand extends CommandBase{
 
     LimelightSubsystem m_limelight;
     Shooter m_shooter;
     int m_counter = 0;
 
-    public KickerAndShooterCommand(Shooter shooter, LimelightSubsystem limelightSubsystem){
+    public KickerAndShooterWithDistanceCommand(Shooter shooter, LimelightSubsystem limelightSubsystem){
         m_shooter = shooter;
         m_limelight = limelightSubsystem;
         addRequirements(shooter);
@@ -50,6 +51,6 @@ public class KickerAndShooterCommand extends CommandBase{
 
     @Override
     public void end(boolean interrupted){
-        m_shooter.stop();
+        //m_shooter.stop();
     }
 }

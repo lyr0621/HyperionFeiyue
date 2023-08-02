@@ -11,10 +11,11 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
-import frc.robot.auto.FollowPathCommand;
+import frc.robot.auto.AutonomousFactory;
 import frc.robot.commands.DockAndEngageCommand;
 import frc.robot.commands.Drive;
-import frc.robot.commands.KickerAndShooterCommand;
+import frc.robot.commands.KickerAndShooterWithDistanceCommand;
+//import frc.robot.commands.KickerAndShooterStopCommand;
 import frc.robot.subsystems.*;
 
 
@@ -29,9 +30,12 @@ public class RobotContainer
     // The robot's subsystems and commands are defined here...
     private final SwerveDrivetrain m_drive = new SwerveDrivetrain();
     private final Intake m_intake = new Intake();
+    //private final PracticeShooter m_shooter = new PracticeShooter(new int[]{21,22},18,new boolean[]{true,false,true});
     private final Shooter m_shooter = new Shooter();
     private final TurretSubsystem m_turret = new TurretSubsystem();
     private final LimelightSubsystem m_limelight = new LimelightSubsystem();
+
+    private final AutonomousFactory m_autonomousFacotry = new AutonomousFactory(m_shooter, m_intake, m_drive);
 
     private final PneumaticHub ph = new PneumaticHub(2);
     
@@ -77,9 +81,22 @@ public class RobotContainer
                 .whileTrue(new InstantCommand(m_shooter::runFlywheel))
                 .whileFalse(new InstantCommand(m_shooter::stop));
 
+
+
+
         driverController.y()
                 .and(driverController.x())
-                .whileTrue(new KickerAndShooterCommand(m_shooter, m_limelight));
+                .whileTrue(new KickerAndShooterWithDistanceCommand(m_shooter, m_limelight));
+
+        //driverController.y()
+        //        .and(driverController.x())
+        //        .onTrue(new KickerAndShooterCommand(m_shooter, m_limelight))
+        //        .onFalse(new KickerAndShooterStopCommand(m_shooter, m_limelight));
+
+        //driverController.y()
+        //        .and(driverController.x())
+        //        .whileTrue(new InstantCommand(m_shooter::shoot))
+        //        .whileFalse(new InstantCommand(m_shooter::stop));
 
         driverController.start().onTrue(m_drive.resetGyroBase());
 //        driverController.rightBumper()
@@ -104,7 +121,9 @@ public class RobotContainer
      */
     public Command getAutonomousCommand()
     {
+        return m_autonomousFacotry.getAutonomousCommand();
         // An example command will be run in autonomous
-        return new FollowPathCommand(m_drive, "New Path");
+        // return new FollowPathCommand(m_drive, "New Path");
+
     }
 }

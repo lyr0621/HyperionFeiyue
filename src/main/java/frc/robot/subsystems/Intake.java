@@ -24,6 +24,11 @@ public class Intake extends SubsystemBase {
         m_intake.set(ControlMode.PercentOutput, -0.25);
     }
 
+    public void intaking() {
+        m_indexer.set(ControlMode.PercentOutput, 0.75);
+        m_intake.set(ControlMode.PercentOutput, -0.25);
+
+    }
     public void retract() {
         m_pistons.set(DoubleSolenoid.Value.kReverse);
         m_indexer.set(ControlMode.PercentOutput, 0.0);
