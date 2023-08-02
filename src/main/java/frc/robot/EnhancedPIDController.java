@@ -337,7 +337,6 @@ public class EnhancedPIDController {
         /**
          * Creates a new profile with the all settings given and fixed all the time
          *
-         * @param dynamicallyAdjusting                  whether this profile will update according to feedbacks of the robot
          * @param maxPowerAllowed                       the restriction on power
          * @param minPowerToMove                        the amount of motor power required to make the mechanism moving
          * @param errorStartDecelerate                  the distance to target where the mechanism should start decelerate, the mechanism will otherwise move with full power

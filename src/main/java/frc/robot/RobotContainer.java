@@ -78,14 +78,16 @@ public class RobotContainer
 //                .whileTrue(new InstantCommand(m_intake::runMagazine).alongWith(new InstantCommand(m_shooter::shoot)))
 //                .whileFalse(new InstantCommand(m_intake::stopMagazine).alongWith(new InstantCommand(m_shooter::stop)));
 
-        PracticeShooter shooter = new PracticeShooter(new int[] {21, 22}, 18, new boolean[] {true, false, true});
+        PracticeShooter shooter = new PracticeShooter(new int[] {21}, 18, new boolean[] {false, true});
 
         shooter.disableShooter();
         driverController.y()
                 .onTrue(new InstantCommand(shooter::enableShooter))
                 .onFalse(new InstantCommand(shooter::disableShooter));
 
-        driverController.x().onTrue(new InstantCommand(m_drive::balanceOnSeesaw)).onFalse(new InstantCommand(m_drive::disableMotors));
+        shooter.setMotorDisabled();
+        driverController.x().onTrue(new InstantCommand(shooter::setDefaultShooterSpeed));
+        driverController.y().onTrue(new InstantCommand(shooter::setMotorDisabled));
 
         driverController.start().onTrue(m_drive.resetGyroBase());
 //        driverController.rightBumper()

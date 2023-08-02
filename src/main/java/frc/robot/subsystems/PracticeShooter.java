@@ -44,7 +44,7 @@ public class PracticeShooter extends SubsystemBase {
     }
 
     public void setShooterSpeed(int speedRPM) {
-        this.pidController.startNewTask(new EnhancedPIDController.Task(EnhancedPIDController.Task.SET_TO_SPEED, 3000));
+        this.pidController.startNewTask(new EnhancedPIDController.Task(EnhancedPIDController.Task.SET_TO_SPEED, speedRPM));
     }
 
     public void disableShooter() {
