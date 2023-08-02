@@ -9,19 +9,20 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Utils;
 
+@Deprecated
 public class Shooter extends SubsystemBase {
-    private TalonFX m_left;
-    private TalonFX m_right_master;
-    private TalonFX m_kicker;
-    private ShooterLookupTable m_lookuptable;
-
+    protected final TalonFX m_left_follower;
+    protected final TalonFX m_right_master;
+    protected final TalonFX m_kicker;
+    protected final ShooterLookupTable m_lookuptable;
+    protected final double defaultSpeed = 3000;
 
     private SimpleMotorFeedforward m_ff;
 
     public Shooter() {
         SmartDashboard.putNumber("Shooter RPM", 3000);
 
-        m_left = new TalonFX(21);
+        m_left_follower = new TalonFX(21);
         m_right_master = new TalonFX(22);
         m_kicker = new TalonFX(18);
 
@@ -29,10 +30,10 @@ public class Shooter extends SubsystemBase {
         m_lookuptable = new ShooterLookupTable();
 
         m_right_master.configFactoryDefault();
-        m_left.configFactoryDefault();
+        m_left_follower.configFactoryDefault();
         m_kicker.configFactoryDefault();
 
-        m_left.follow(m_right_master);
+        m_left_follower.follow(m_right_master);
 
         m_right_master.configVoltageCompSaturation(12.0);
         //m_left.configVoltageCompSaturation(12.0);
@@ -58,7 +59,7 @@ public class Shooter extends SubsystemBase {
 
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("Recorded RPM Left", Utils.falconToRPM(m_left.getSelectedSensorVelocity(), 1.0));
+        SmartDashboard.putNumber("Recorded RPM Left", Utils.falconToRPM(m_left_follower.getSelectedSensorVelocity(), 1.0));
         SmartDashboard.putNumber("Recorded RPM Right", Utils.falconToRPM(m_right_master.getSelectedSensorVelocity(), 1.0));
         // SmartDashboard.putNumber("Desired RPM", SmartDashboard.getNumber("Shooter RPM", m_lookuptable.getVelocity()));
 
@@ -66,7 +67,7 @@ public class Shooter extends SubsystemBase {
 
 
     public double get_shooter_rpm(){
-        return Utils.falconToRPM(m_left.getSelectedSensorVelocity(), 1.0);
+        return Utils.falconToRPM(m_right_master.getSelectedSensorVelocity(), 1.0);
     }
 
     public double get_target_rpm(double distance){
@@ -95,13 +96,7 @@ public class Shooter extends SubsystemBase {
     }
 
     public void runFlywheel() {
-
-        double output = SmartDashboard.getNumber("Shooter RPM", 3000);
-        double arbOutput = m_ff.calculate(3000);
-//        arbOutput = 0.0;
-
-        m_right_master.set(TalonFXControlMode.Velocity, Utils.RPMToFalcon(output, 1.0), DemandType.ArbitraryFeedForward, arbOutput);
-        //m_left.set(TalonFXControlMode.Velocity, Utils.RPMToFalcon(output, 1.0), DemandType.ArbitraryFeedForward, arbOutput);
+        runFlywheel(defaultSpeed);
     }
 
     public void runKicker() {
@@ -109,7 +104,7 @@ public class Shooter extends SubsystemBase {
     }
     public void shoot() {
         runKicker();
-        runFlywheel(3000);
+        runFlywheel(defaultSpeed);
     }
 
     public void stop() {
@@ -117,7 +112,7 @@ public class Shooter extends SubsystemBase {
         m_right_master.set(TalonFXControlMode.PercentOutput, 0.0);
         m_kicker.set(TalonFXControlMode.PercentOutput, 0.0);
     }
-
+    @Deprecated
     public double calcRpmForDistance(double distance) {
         return (0.051 * Math.pow(distance, 2)) - (7.834 * distance) + 3749.589;
     }
