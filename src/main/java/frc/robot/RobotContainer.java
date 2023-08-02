@@ -31,6 +31,7 @@ public class RobotContainer
     private final TurretSubsystem m_turret = new TurretSubsystem();
 
     private final PneumaticHub ph = new PneumaticHub(2);
+    PracticeShooter shooter;
     
     // Replace with CommandPS4Controller or CommandJoystick if needed
     private final CommandXboxController driverController =
@@ -78,23 +79,27 @@ public class RobotContainer
 //                .whileTrue(new InstantCommand(m_intake::runMagazine).alongWith(new InstantCommand(m_shooter::shoot)))
 //                .whileFalse(new InstantCommand(m_intake::stopMagazine).alongWith(new InstantCommand(m_shooter::stop)));
 
-        PracticeShooter shooter = new PracticeShooter(new int[] {21}, 18, new boolean[] {false, true});
+        shooter = new PracticeShooter(new int[] {21,22}, 18, new boolean[] {true, false, true});
 
-        shooter.disableShooter();
-        driverController.y()
-                .onTrue(new InstantCommand(shooter::enableShooter))
-                .onFalse(new InstantCommand(shooter::disableShooter));
-
-        shooter.setMotorDisabled();
+        shooter.setZeroShooterSpeed();
         driverController.x().onTrue(new InstantCommand(shooter::setDefaultShooterSpeed));
-        driverController.y().onTrue(new InstantCommand(shooter::setMotorDisabled));
+        driverController.y().onTrue(new InstantCommand(shooter::setZeroShooterSpeed));
+        driverController.a().onTrue(new InstantCommand(shooter::setHigherShooterSpeed));
 
         driverController.start().onTrue(m_drive.resetGyroBase());
 //        driverController.rightBumper()
 //                .whileTrue(m_turret.trackTargetFactory())
 //                .whileFalse(m_turret.stopTurretFactory());
     }
-    
+
+    public void onDisabled() {
+        shooter.setZeroShooterSpeed();
+        shooter.disableShooter();
+    }
+
+    public void onEnabled() {
+        shooter.enableShooter();
+    }
     
     /**
      * Use this to pass the autonomous command to the main {@link Robot} class.

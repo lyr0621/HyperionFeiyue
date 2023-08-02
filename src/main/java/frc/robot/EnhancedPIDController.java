@@ -48,16 +48,30 @@ public class EnhancedPIDController {
     }
 
     /** set all variables to initial state */
-    public void reset(double initialValue) {
+    public void reset(double initialValue, boolean resetIntegralValue) {
         dt.start();
         dt.reset();
         task.resetTaskTime();
         previousPosition = initialValue;
         previousVelocity = 0;
         previousMotorPower = 0;
-        integralValue = 0;
+        if (resetIntegralValue)
+            integralValue = 0;
         pathSchedule = null;
         speedChangingProcess = null;
+    }
+
+    public void reset(double initialValue) {
+        reset(initialValue, true);
+    }
+
+    public void startNewTaskKeepIntegration(Task newTask, double initialPosition) {
+        this.task = newTask;
+        reset(initialPosition, false);
+    }
+
+    public void startNewTaskKeepIntegration(Task newTask) {
+        startNewTaskKeepIntegration(newTask, previousPosition);
     }
 
     public void startNewTask(Task newTask, double initialPosition) {

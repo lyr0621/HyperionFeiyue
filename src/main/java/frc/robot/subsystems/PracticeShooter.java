@@ -3,8 +3,6 @@ package frc.robot.subsystems;
 import com.ctre.phoenix.motorcontrol.InvertType;
 import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.EnhancedPIDController;
@@ -33,18 +31,18 @@ public class PracticeShooter extends SubsystemBase {
         kickerMotor.setInverted(reverted[reverted.length-1]);
 
         this.pidController = new EnhancedPIDController(new EnhancedPIDController.DynamicalPIDProfile(
-                0.5,
-                0.1,
+                0.8,
+                0,
                 0,
                 0,
                 0.8 / 3000,
-                4000,
+                1500,
                 6000
         ));
     }
 
     public void setShooterSpeed(int speedRPM) {
-        this.pidController.startNewTask(new EnhancedPIDController.Task(EnhancedPIDController.Task.SET_TO_SPEED, speedRPM));
+        this.pidController.startNewTaskKeepIntegration(new EnhancedPIDController.Task(EnhancedPIDController.Task.SET_TO_SPEED, speedRPM));
     }
 
     public void disableShooter() {
@@ -57,7 +55,12 @@ public class PracticeShooter extends SubsystemBase {
 
     @Override
     public void periodic() {
-        double feedBackPower = pidController.getMotorPower(0, getCurrentSpeedRPM());
+        double feedBackPower;
+
+        if (disabled)
+            feedBackPower = 0;
+        else
+            feedBackPower = pidController.getMotorPower(0, getCurrentSpeedRPM());
         SmartDashboard.putNumber("current speed(rpm): " , getCurrentSpeedRPM());
         SmartDashboard.putNumber("feed-back power:", feedBackPower);
 
@@ -74,5 +77,9 @@ public class PracticeShooter extends SubsystemBase {
         setShooterSpeed(3000);
     }
 
-    public void setMotorDisabled() { setShooterSpeed(0); }
+    public void setHigherShooterSpeed() {
+        setShooterSpeed(6000);
+    }
+
+    public void setZeroShooterSpeed() { setShooterSpeed(0); }
 }
