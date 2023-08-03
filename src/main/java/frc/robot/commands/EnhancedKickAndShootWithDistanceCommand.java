@@ -1,7 +1,6 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.EnhancedShooter;
 import frc.robot.subsystems.LimelightSubsystem;
@@ -35,6 +34,7 @@ public class EnhancedKickAndShootWithDistanceCommand extends CommandBase {
             return;
         double distance = m_limelight.get_distance();
         m_shooter.shoot_from_anywhere(distance);
+        m_shooter.setWaitAndShootTask();
     }
 
     /** called repeatedly when the button is pressed */

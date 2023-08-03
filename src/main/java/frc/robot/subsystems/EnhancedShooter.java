@@ -13,6 +13,7 @@ import frc.robot.Utils;
 public class EnhancedShooter extends Shooter {
     private EnhancedPIDController pidController;
     private boolean disabled;
+    private boolean wasEnabled = false;
     private boolean onWaitAndShootTask;
     private double desiredShooterRPM;
     private final double shooterSpeedToleranceRPM = 500;
@@ -28,7 +29,7 @@ public class EnhancedShooter extends Shooter {
                 0,
                 0,
                 0.8 / 3000,
-                1500,
+                2500,
                 6000
         ));
     }
@@ -41,12 +42,15 @@ public class EnhancedShooter extends Shooter {
         SmartDashboard.putNumber("Recorded RPM Left", Utils.falconToRPM(super.m_left_follower.getSelectedSensorVelocity(), 1.0));
         SmartDashboard.putNumber("Recorded RPM Right", Utils.falconToRPM(super.m_right_master.getSelectedSensorVelocity(), 1.0));
 
+        // System.out.println("desired RPM" + desiredShooterRPM);
         double feedBackPower = 0;
         if (!disabled)
             feedBackPower = pidController.getMotorPower(0, super.get_shooter_rpm());
+        // System.out.println("disabled:" + disabled);
 
         m_right_master.set(TalonFXControlMode.PercentOutput, feedBackPower);
 
+        System.out.println("error: " + Math.abs(get_shooter_rpm() - desiredShooterRPM));
         if (Math.abs(get_shooter_rpm() - desiredShooterRPM) < shooterSpeedToleranceRPM && onWaitAndShootTask) {
             onWaitAndShootTask = false;
             super.runKicker();
@@ -55,13 +59,22 @@ public class EnhancedShooter extends Shooter {
 
     /**
      * set the targeted speed of the fly wheel, called once during each operation, and the updating process will be proceeded in each following period
+     * repeated operations(the new task is the same as old one) will be ignored
      * @param desiredShooterRPM the desired speed of the fly wheel, in rpm
      */
-    public void setDesiredFlyWheelSpeed(double desiredShooterRPM) {
+    public void setDesiredFlyWheelRPM(double desiredShooterRPM) {
+        if (desiredShooterRPM == this.desiredShooterRPM)
+            return;
         this.desiredShooterRPM = desiredShooterRPM;
         this.pidController.startNewTaskKeepIntegration(new EnhancedPIDController.Task(
                 EnhancedPIDController.Task.SET_TO_SPEED, desiredShooterRPM
         ));
+
+        System.out.println("started new task...");
+    }
+
+    public void setDesiredFlyWheelRPM() {
+        setDesiredFlyWheelRPM(super.defaultSpeed);
     }
 
     /**
@@ -72,12 +85,12 @@ public class EnhancedShooter extends Shooter {
     @Override
     public void shoot_from_anywhere(double distance){
         double rpm = get_target_rpm(distance);
-        setDesiredFlyWheelSpeed(rpm);
+        setDesiredFlyWheelRPM(rpm);
     }
 
     @Override
     public void stop() {
-        setDesiredFlyWheelSpeed(0);
+        setDesiredFlyWheelRPM(0);
         super.stop();
     }
 
@@ -91,13 +104,20 @@ public class EnhancedShooter extends Shooter {
 
 
     /** disable the shooter(should be called whenever robot is set to disabled */
-    public void setDisabled() {
+    public void onDisabled() {
         this.disabled = true;
+        this.wasEnabled = false;
+        stop();
     }
 
     /** enable the shooter */
-    public void setEnabled() {
+    public void onEnabled() { // fix logic here: fly wheel started once after enabling
         this.disabled = false;
+        if (!wasEnabled) {
+            setDesiredFlyWheelRPM(0);
+            setDesiredFlyWheelRPM(this.desiredShooterRPM);
+            wasEnabled = true;
+        }
     }
 
     /**

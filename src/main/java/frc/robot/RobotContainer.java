@@ -31,7 +31,7 @@ public class RobotContainer
     private final SwerveDrivetrain m_drive = new SwerveDrivetrain();
     private final Intake m_intake = new Intake();
     //private final PracticeShooter m_shooter = new PracticeShooter(new int[]{21,22},18,new boolean[]{true,false,true});
-    private final Shooter m_shooter = new Shooter();
+    private final EnhancedShooter m_shooter = new EnhancedShooter();
     private final TurretSubsystem m_turret = new TurretSubsystem();
     private final LimelightSubsystem m_limelight = new LimelightSubsystem();
 
@@ -78,11 +78,8 @@ public class RobotContainer
 
         driverController.y()
                 .and(driverController.x().negate())
-                .whileTrue(new InstantCommand(m_shooter::runFlywheel))
+                .whileTrue(new InstantCommand(m_shooter::setDesiredFlyWheelRPM))
                 .whileFalse(new InstantCommand(m_shooter::stop));
-
-
-
 
         driverController.y()
                 .and(driverController.x())
@@ -111,6 +108,14 @@ public class RobotContainer
                 .whileFalse(new InstantCommand(m_intake::stopMagazine).alongWith(new InstantCommand(m_intake::retract)).alongWith(new InstantCommand(m_intake::stopIntake)));
 
 
+    }
+
+    public void onDisabled() {
+        this.m_shooter.onDisabled();
+    }
+
+    public void onEnabled() {
+        this.m_shooter.onEnabled();
     }
     
     

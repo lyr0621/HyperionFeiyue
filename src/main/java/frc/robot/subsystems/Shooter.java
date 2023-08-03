@@ -20,8 +20,6 @@ public class Shooter extends SubsystemBase {
     private SimpleMotorFeedforward m_ff;
 
     public Shooter() {
-        SmartDashboard.putNumber("Shooter RPM", 3000);
-
         m_left_follower = new TalonFX(21);
         m_right_master = new TalonFX(22);
         m_kicker = new TalonFX(18);
@@ -85,7 +83,6 @@ public class Shooter extends SubsystemBase {
         lime_light distance: |  2800  |
         dashboard distance:  |   71   |
          */
-        SmartDashboard.putNumber("Shooter RPM", speed);
         double output = speed;
         // SmartDashboard.getNumber("Shooter RPM", speed);
         double arbOutput = m_ff.calculate(speed);
