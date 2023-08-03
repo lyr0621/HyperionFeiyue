@@ -16,7 +16,7 @@ public class EnhancedShooter extends Shooter {
     private boolean wasEnabled = false;
     private boolean onWaitAndShootTask;
     private double desiredShooterRPM;
-    private final double shooterSpeedToleranceRPM = 500;
+    private final double shooterSpeedToleranceRPM = 200;
 
     public EnhancedShooter() {
         super();
@@ -24,12 +24,12 @@ public class EnhancedShooter extends Shooter {
         onWaitAndShootTask = false;
         desiredShooterRPM = 0;
         pidController =  new EnhancedPIDController(new EnhancedPIDController.DynamicalPIDProfile(
-                0.8,
+                0.85,
                 0,
                 0,
                 0,
-                0.8 / 3000,
-                2500,
+                1.6 / 3000,
+                3000,
                 6000
         ));
     }
@@ -50,8 +50,9 @@ public class EnhancedShooter extends Shooter {
 
         m_right_master.set(TalonFXControlMode.PercentOutput, feedBackPower);
 
-        System.out.println("error: " + Math.abs(get_shooter_rpm() - desiredShooterRPM));
+        // System.out.println("error: " + Math.abs(get_shooter_rpm() - desiredShooterRPM));
         if (Math.abs(get_shooter_rpm() - desiredShooterRPM) < shooterSpeedToleranceRPM && onWaitAndShootTask) {
+            System.out.println("running kicker...");
             onWaitAndShootTask = false;
             super.runKicker();
         }
@@ -70,7 +71,7 @@ public class EnhancedShooter extends Shooter {
                 EnhancedPIDController.Task.SET_TO_SPEED, desiredShooterRPM
         ));
 
-        System.out.println("started new task...");
+        // System.out.println("started new task...");
     }
 
     public void setDesiredFlyWheelRPM() {
@@ -99,6 +100,7 @@ public class EnhancedShooter extends Shooter {
      * the task will be proceeded in the following periods
      *  */
     public void setWaitAndShootTask() {
+        System.out.println("set task");
         onWaitAndShootTask = true;
     }
 
@@ -107,6 +109,7 @@ public class EnhancedShooter extends Shooter {
     public void onDisabled() {
         this.disabled = true;
         this.wasEnabled = false;
+        setDesiredFlyWheelRPM(0);
         stop();
     }
 
@@ -114,7 +117,6 @@ public class EnhancedShooter extends Shooter {
     public void onEnabled() { // fix logic here: fly wheel started once after enabling
         this.disabled = false;
         if (!wasEnabled) {
-            setDesiredFlyWheelRPM(0);
             setDesiredFlyWheelRPM(this.desiredShooterRPM);
             wasEnabled = true;
         }

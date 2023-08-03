@@ -14,6 +14,7 @@ import frc.robot.Constants.OperatorConstants;
 import frc.robot.auto.AutonomousFactory;
 import frc.robot.commands.DockAndEngageCommand;
 import frc.robot.commands.Drive;
+import frc.robot.commands.EnhancedKickAndShootWithDistanceCommand;
 import frc.robot.commands.KickerAndShooterWithDistanceCommand;
 //import frc.robot.commands.KickerAndShooterStopCommand;
 import frc.robot.subsystems.*;
@@ -83,7 +84,7 @@ public class RobotContainer
 
         driverController.y()
                 .and(driverController.x())
-                .whileTrue(new KickerAndShooterWithDistanceCommand(m_shooter, m_limelight));
+                .whileTrue(new EnhancedKickAndShootWithDistanceCommand(m_shooter, m_limelight));
 
         //driverController.y()
         //        .and(driverController.x())

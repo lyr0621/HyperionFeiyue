@@ -18,6 +18,8 @@ public class EnhancedKickAndShootWithDistanceCommand extends CommandBase {
      */
     private Timer speedReachedTimer;
 
+    private final double shootTime = 1.5;
+
     public EnhancedKickAndShootWithDistanceCommand(EnhancedShooter shooter, LimelightSubsystem limelightSubsystem){
         m_shooter = shooter;
         m_limelight = limelightSubsystem;
@@ -27,7 +29,7 @@ public class EnhancedKickAndShootWithDistanceCommand extends CommandBase {
 
     /** called when the button turns from unpressed to pressed */
     @Override
-    public void initialize(){
+    public void initialize(){ // TODO this function isn't called, that is the problem
         targetSeen = false;
         desiredFlyWheelSpeedReached = false;
         if (m_limelight.limelightAngle() == 0)
@@ -44,13 +46,14 @@ public class EnhancedKickAndShootWithDistanceCommand extends CommandBase {
             if (!m_shooter.isOnWaitAndShootTask()) { // sense for reaching
                 desiredFlyWheelSpeedReached = true;
                 speedReachedTimer.start();
+                System.out.println("fly wheel speed reached");
                 return;
             }
     }
 
     @Override
     public boolean isFinished(){
-        return (!targetSeen) && desiredFlyWheelSpeedReached && speedReachedTimer.get() > 0.6;
+        return (!targetSeen) && desiredFlyWheelSpeedReached && speedReachedTimer.get() > shootTime;
     }
 
     @Override
